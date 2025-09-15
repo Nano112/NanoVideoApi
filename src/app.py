@@ -25,7 +25,7 @@ DOWNLOADS_DIR = os.environ.get('DOWNLOADS_DIR', os.getenv('DOWNLOADS_DIR', 'down
 API_KEYS = os.environ.get('API_KEYS', os.getenv('API_KEYS', '')).split(',')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', os.getenv('ALLOWED_HOSTS', '')).split(',')
 HOST = os.environ.get('HOST', os.getenv('HOST', '0.0.0.0'))
-PORT = int(os.environ.get('PORT', os.getenv('PORT', '8000')))
+PORT = int(os.environ.get('API_PORT', os.getenv('API_PORT', '8000')))
 
 # Log startup configuration (without exposing API keys)
 logger.info("="*50)
