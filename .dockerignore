@@ -1,12 +1,3 @@
-# Downloads directory
-downloads/
-src/downloads/
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
 # Python
 __pycache__/
 *.py[cod]
@@ -16,6 +7,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+downloads/
 eggs/
 .eggs/
 lib/
@@ -29,14 +21,12 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual environments
 .venv/
 venv/
 ENV/
 env/
-.env
 
 # IDE
 .vscode/
@@ -44,8 +34,6 @@ env/
 *.swp
 *.swo
 *~
-.vscode
-.idea
 
 # OS
 .DS_Store
@@ -56,42 +44,40 @@ env/
 ehthumbs.db
 Thumbs.db
 
-# Docker (optional, usually you want to commit these)
-# Dockerfile
-# docker-compose*.yml
-# .dockerignore
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
 
 # Logs
 logs/
 *.log
-log/
 
 # Testing
 .coverage
 .pytest_cache/
 .tox/
-htmlcov/
-.nox/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Documentation
+README.md
+docs/
 
-# pyenv
-.python-version
+# Cache directories
+.cache/
+.npm/
 
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# Backup files
-*.backup
-*.bak
-*.orig
+# Local downloads (will be created in container)
+downloads/*
 
 # Temporary files
 *.tmp
 *.temp
-tmp/
-temp/

@@ -2,6 +2,7 @@ import os
 import logging
 from urllib.parse import urlparse
 import hashlib
+import time
 from sanic import Sanic
 import aiohttp
 from sanic.response import json, file_stream, json
@@ -22,6 +23,9 @@ logger = logging.getLogger('NanoVideoApi')
 DOWNLOADS_DIR = os.getenv('DOWNLOADS_DIR', 'downloads')
 API_KEYS = os.getenv('API_KEYS', '').split(',')  # Comma-separated API keys
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')  # For CORS
+
+# Application startup time for health checks
+app_start_time = time.time()
 
 # Ensure the downloads directory exists
 if not os.path.exists(DOWNLOADS_DIR):
@@ -57,6 +61,28 @@ async def add_cors_headers(request, response):
 @app.route("/")
 async def index(request):
     return json({"message": "Welcome to the NanoVideoApi!"})
+
+@app.route("/health")
+async def health_check(request):
+    """Health check endpoint for container orchestration."""
+    uptime = time.time() - app_start_time
+    
+    # Check if downloads directory is accessible
+    downloads_writable = os.access(DOWNLOADS_DIR, os.W_OK)
+    
+    health_status = {
+        "status": "healthy",
+        "uptime_seconds": round(uptime, 2),
+        "downloads_dir_writable": downloads_writable,
+        "api_version": "1.0.0"
+    }
+    
+    # If critical components are not working, return unhealthy status
+    if not downloads_writable:
+        health_status["status"] = "unhealthy"
+        return json(health_status, status=503)
+    
+    return json(health_status)
 
 @app.route("/share", methods=["GET", "POST", "OPTIONS"])
 async def share_download(request):
