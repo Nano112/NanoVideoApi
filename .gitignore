@@ -1,0 +1,5 @@
+downloads/
+src/downloads/
+.env
+.DS_Store
+src/.DS_Store
