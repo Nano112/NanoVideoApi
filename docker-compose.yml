@@ -1,21 +1,18 @@
-version: '3.8'
-
 services:
   nanovideo-api:
     build: .
     ports:
       - "8001:8000"
     environment:
-      - HOST=0.0.0.0
-      - PORT=8000
-      - DOWNLOADS_DIR=/app/downloads
-      - API_KEYS=your-secure-api-key-here
-      - ALLOWED_HOSTS=*
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8000}
+      - DOWNLOADS_DIR=${DOWNLOADS_DIR:-/app/downloads}
+      - API_KEYS=${API_KEYS:-}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
     volumes:
-      # Mount downloads directory for persistence
-      - ./downloads:/app/downloads
-      # Mount logs if needed
-      - ./logs:/app/logs
+      # Named volumes for persistence across deployments
+      - nanovideo_downloads:/app/downloads
+      - nanovideo_logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -25,6 +22,13 @@ services:
       start_period: 40s
     networks:
       - nanovideo-network
+
+volumes:
+  # Named volumes persist across container recreations and deployments
+  nanovideo_downloads:
+    driver: local
+  nanovideo_logs:
+    driver: local
 
 networks:
   nanovideo-network:
