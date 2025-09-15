@@ -7,17 +7,18 @@ Your NanoVideoApi is now production-ready! Here's what has been set up:
 ## ✅ What's Been Created
 
 ### Core Files
-- `Dockerfile` - Multi-stage production Docker build
+- `Dockerfile` - Multi-stage production Docker build (uses Sanic directly)
+- `Dockerfile.gunicorn` - Alternative with Gunicorn for high-scale deployments
 - `docker-compose.yml` - Local testing setup
-- `start.sh` - Production startup script with Gunicorn
+- `start.sh` - Gunicorn startup script (for use with Dockerfile.gunicorn)
 - `.dockerignore` - Optimized build context
 - `.env.example` - Environment configuration template
 - `README.md` - Complete documentation
 
 ### Application Updates
 - Added `/health` endpoint for container health checks
-- Updated logging and error handling
-- Production-ready Gunicorn configuration
+- Fixed imports and dependencies
+- Production-ready configuration
 - Security hardening (non-root user, proper permissions)
 
 ## 🐳 Dokploy Deployment Steps
@@ -45,7 +46,6 @@ Your NanoVideoApi is now production-ready! Here's what has been set up:
      ALLOWED_HOSTS=yourdomain.com,api.yourdomain.com
      HOST=0.0.0.0
      PORT=8000
-     WORKERS=4
      ```
 
 4. **Deploy**
@@ -75,8 +75,30 @@ docker build -t nanovideo-api .
 # Run container
 docker run -p 8000:8000 \
   -e API_KEYS=test-key \
-  -e ALLOWED_HOSTS=* \
+  -e "ALLOWED_HOSTS=*" \
   nanovideo-api
+```
+
+## 📈 Scaling Options
+
+### Option 1: Sanic Direct (Default - Dockerfile)
+- Simple deployment
+- Good for small to medium traffic
+- Lower memory footprint
+- Easier debugging
+
+### Option 2: Gunicorn + Sanic (Dockerfile.gunicorn)
+For high-traffic deployments:
+```bash
+# Build with Gunicorn
+docker build -f Dockerfile.gunicorn -t nanovideo-api-gunicorn .
+
+# Run with worker configuration
+docker run -p 8000:8000 \
+  -e API_KEYS=your-api-key \
+  -e WORKERS=8 \
+  -e "ALLOWED_HOSTS=yourdomain.com" \
+  nanovideo-api-gunicorn
 ```
 
 ## 🔧 Configuration Options
@@ -86,12 +108,13 @@ docker run -p 8000:8000 \
 |----------|-------------------|-------------|
 | `API_KEYS` | `key1,key2,key3` | Secure API keys |
 | `ALLOWED_HOSTS` | `api.yourdomain.com` | Specific domains for CORS |
-| `WORKERS` | `4` | Gunicorn workers (CPU cores × 2) |
+| `WORKERS` | `4` | Gunicorn workers (CPU cores × 2) - only for Gunicorn setup |
 | `PORT` | `8000` | Application port |
 
 ### Performance Tuning
-- **Workers**: Set to `(CPU cores × 2) + 1`
-- **Memory**: ~512MB per worker recommended
+- **Default Setup**: Single-process Sanic (good for most use cases)
+- **High-traffic Setup**: Use Dockerfile.gunicorn with multiple workers
+- **Memory**: ~256MB for default, ~512MB per worker for Gunicorn
 - **Storage**: Monitor downloads directory growth
 
 ## 📊 Monitoring
@@ -101,15 +124,25 @@ docker run -p 8000:8000 \
 - Docker health check: Built-in every 30 seconds
 - Returns application uptime and system status
 
+Example response:
+```json
+{
+  "status": "healthy",
+  "uptime_seconds": 123.45,
+  "downloads_dir_writable": true,
+  "api_version": "1.0.0"
+}
+```
+
 ### Logs
-- Access logs: `/app/logs/access.log`
-- Error logs: `/app/logs/error.log`
-- Application logs: stdout/stderr
+- Default setup: stdout/stderr (visible with `docker logs`)
+- Gunicorn setup: `/app/logs/access.log` and `/app/logs/error.log`
 
 ## 🔒 Security Checklist
 
 - [x] Non-root user in container
 - [x] API key authentication required
+- [x] Removed unused dependencies
 - [ ] Update ALLOWED_HOSTS for production (replace `*`)
 - [ ] Use secure, random API keys
 - [ ] Deploy behind HTTPS reverse proxy
@@ -122,6 +155,9 @@ Once deployed, your API will have these endpoints:
 ```bash
 # Health check (no auth required)
 GET /health
+
+# Welcome message
+GET /?api_key=your-api-key
 
 # Get video info (requires API key)
 POST /info
@@ -147,10 +183,11 @@ GET /files/{filename}?api_key=your-api-key
 3. Dokploy will auto-deploy on push (if configured)
 4. Or manually trigger deployment in Dokploy dashboard
 
-### Scaling
-- Increase `WORKERS` environment variable
-- Monitor CPU and memory usage
-- Consider horizontal scaling for high traffic
+### Switching to High-Scale Setup
+If you need more performance, switch to the Gunicorn setup:
+1. In Dokploy, change the Dockerfile to `Dockerfile.gunicorn`
+2. Set `WORKERS` environment variable (recommended: CPU cores × 2)
+3. Redeploy
 
 ## ❗ Important Notes
 
@@ -158,14 +195,15 @@ GET /files/{filename}?api_key=your-api-key
 2. **API Keys**: Keep them secret and rotate regularly  
 3. **CORS**: Update ALLOWED_HOSTS for production security
 4. **SSL/TLS**: Always use HTTPS in production
-5. **Backups**: Consider backing up cached files if needed
+5. **Dependencies**: All unused imports have been removed for smaller image size
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
-- Health check fails: Check file permissions and disk space
-- Out of memory: Reduce worker count or increase server memory
-- Slow downloads: Check network connectivity and disk I/O
+- **Health check fails**: Check file permissions and disk space
+- **Import errors**: Rebuild image after code changes
+- **Out of memory**: Switch to Gunicorn setup or reduce workers
+- **Slow downloads**: Check network connectivity and disk I/O
 
 ### Debug Commands
 ```bash
@@ -182,4 +220,23 @@ docker exec -it nanovideo-api /bin/bash
 curl -f http://localhost:8000/health
 ```
 
+### Fixed Issues
+- ✅ Removed unused `aiohttp` import that was causing startup failures
+- ✅ Corrected Gunicorn startup script options
+- ✅ Simplified default deployment to use Sanic directly
+
 Your NanoVideoApi is now ready for production deployment! 🎉
+
+## 🚀 Quick Start Commands
+
+```bash
+# Test locally
+docker build -t nanovideo-api .
+docker run -p 8000:8000 -e API_KEYS=test -e "ALLOWED_HOSTS=*" nanovideo-api
+
+# Test health
+curl http://localhost:8000/health
+
+# Test API
+curl "http://localhost:8000/?api_key=test"
+```

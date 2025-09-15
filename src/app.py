@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 import hashlib
 import time
 from sanic import Sanic
-import aiohttp
 from sanic.response import json, file_stream, json
 from yt_dlp import YoutubeDL
 
