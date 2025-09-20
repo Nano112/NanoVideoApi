@@ -9,6 +9,11 @@ services:
       - DOWNLOADS_DIR=${DOWNLOADS_DIR:-/app/downloads}
       - API_KEYS=${API_KEYS:-}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - USE_COPYPARTY=${USE_COPYPARTY:-false}
+      - COPYPARTY_URL=${COPYPARTY_URL:-}
+      - COPYPARTY_USERNAME=${COPYPARTY_USERNAME:-}
+      - COPYPARTY_PASSWORD=${COPYPARTY_PASSWORD:-}
+      - COPYPARTY_FOLDER=${COPYPARTY_FOLDER:-}
     volumes:
       # Named volumes for persistence across deployments
       - nanovideo_downloads:/app/downloads
