@@ -4,13 +4,13 @@ A lightweight video downloading API built with Sanic and yt-dlp, designed for pr
 
 ## Features
 
-- 🎥 Video downloading from multiple platforms via yt-dlp
-- 🚀 High-performance async API with Sanic
-- 🐳 Production-ready Docker setup
-- 🔒 API key authentication
-- 🏥 Health check endpoint for container orchestration
-- 📦 File caching and streaming
-- 🔧 CORS support
+- Video downloading from multiple platforms via yt-dlp
+- High-performance async API with Sanic
+- Production-ready Docker setup
+- API key authentication
+- Health check endpoint for container orchestration
+- File caching and streaming
+- CORS support
 
 ## Quick Start
 
